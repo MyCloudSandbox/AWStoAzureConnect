@@ -72,7 +72,7 @@ resource "aws_vpn_gateway" "aws_vpg" {
   }
 }
 
-resource "aws_vpn_connection" "aws_vpn_connection_1" { //This establishes the AWS VPN Connection to connect to Azure
+resource "aws_vpn_connection" "aws_vpn_connection_1" { //This establishes the first VPN Connection to connect to Azure using the first customer gateway.
   vpn_gateway_id      = aws_vpn_gateway.aws_vpg.id
   customer_gateway_id = aws_customer_gateway.aws_cgw_1.id
   type                = "ipsec.1"
@@ -82,7 +82,7 @@ resource "aws_vpn_connection" "aws_vpn_connection_1" { //This establishes the AW
   }
 }
 
-resource "aws_vpn_connection" "aws_vpn_connection_2" { //This establishes the second AWS VPN Connection to connect to Azure
+resource "aws_vpn_connection" "aws_vpn_connection_2" { //This establishes the second VPN Connection to connect to Azure using the second customer gateway.
   vpn_gateway_id      = aws_vpn_gateway.aws_vpg.id
   customer_gateway_id = aws_customer_gateway.aws_cgw_2.id
   type                = "ipsec.1"
@@ -92,17 +92,17 @@ resource "aws_vpn_connection" "aws_vpn_connection_2" { //This establishes the se
   } 
 }
 
-resource "aws_vpn_connection_route" "aws_route_1" {
+resource "aws_vpn_connection_route" "aws_route_1" { // This creates a route for the first VPN connection to send traffic to the Azure VNet CIDR
   vpn_connection_id = aws_vpn_connection.aws_vpn_connection_1.id
   destination_cidr_block = "10.212.0.0/16"  # Azure VNet CIDR
 }
 
-resource "aws_vpn_connection_route" "aws_route_2" {
+resource "aws_vpn_connection_route" "aws_route_2" { // This creates a route for the second VPN connection to send traffic to the Azure VNet CIDR
   vpn_connection_id = aws_vpn_connection.aws_vpn_connection_2.id
   destination_cidr_block = "10.212.0.0/16"  # Azure VNet CIDR
 }
 
-resource "aws_route" "route_to_azure" { //The route that sends traffic to Azure
+resource "aws_route" "route_to_azure" { //This creates a route in the route table to send traffic to Azure via the VPN gateway
   route_table_id         = aws_route_table.route_table.id
   destination_cidr_block = "10.212.0.0/16"
   gateway_id             = aws_vpn_gateway.aws_vpg.id
